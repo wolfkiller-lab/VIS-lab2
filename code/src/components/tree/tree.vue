@@ -312,9 +312,7 @@ export default {
                 .attr('dy', '0.31em')
                 .attr('x', d => d._children ? -6 : 6)
                 .attr('font-size','12px')  // 用style会不能改字体大小
-                .text(d => d.data.name)
-                .text(':')  
-                .text(d => d.data.value);                                 
+                .text(d => d.data.name);                                
 
             this.gLink = this.g.append('g')
                 .attr('fill', 'none')
