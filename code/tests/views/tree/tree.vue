@@ -32,7 +32,18 @@
               </div>
             </el-scrollbar>
           </el-tab-pane>
-          
+          <el-tab-pane label="tooltip" name="fourth">
+            <el-scrollbar style="height: 100%">
+              <div class="form-box">
+                <HForm
+                  v-if="isInited"
+                  :formData="formConfigTooltip.formData"
+                  :items="formConfigTooltip.items"
+                  @eventdone="eventDoneTooltip"
+                ></HForm>
+              </div>
+            </el-scrollbar>
+          </el-tab-pane>
           <el-tab-pane label="chart" name="third">
             <el-scrollbar style="height: 100%">
               <div class="form-box">
@@ -57,9 +68,9 @@ import TestGrid from "~/tests/components/test-grid";
 import HForm from "~/tests/components/h-form";
 // 下面这里请根据你自己的开发情况import相应组件的配置项
 import settingTitle from "~/tests/setting-rules/property-setting-tree-title";
-import settingNodes from "~/tests/setting-rules/property-setting-tree-nodes"
+import settingNodes from "~/tests/setting-rules/property-setting-tree-nodes";
 import settingTooltip from '~/tests/setting-rules/property-setting-tree-tooltip';
-import settingChart from "~/tests/setting-rules/property-setting-tree-chart"
+import settingChart from "~/tests/setting-rules/property-setting-tree-chart";
 
 import { cloneDeep } from "lodash";
 
@@ -93,7 +104,9 @@ export default {
         nodesLineWidth: 2,
 
         tooltipIsShow: true,
-        tooltipPadding: {top: 0, right: 0, bottom: 0, left: 0},
+        tooltipFontSize: 12,
+        tooltipFontFamily: "Arial",
+        tooltipFontColor: "#000",
         tooltipColor: '#eee',
         tooltipBorder: '1px',
         tooltipBorderRadius: 0,
@@ -306,6 +319,19 @@ export default {
           bottom: this.formConfigTooltip.formData.tooltipPaddingBottom
         };
         this.$set(this.bindConfig, 'tooltipPadding', tooltipPadding);
+      }else
+        this.$set(this.bindConfig, data.property, data.args);
+    },
+    eventDoneChart (data) {
+      // 合并padding对象
+      if (data.property.indexOf('Padding') !== -1) {
+        const chartPadding = {
+          left: this.formConfigChart.formData.chartPaddingLeft,
+          right: this.formConfigChart.formData.chartPaddingRight,
+          top: this.formConfigChart.formData.chartPaddingTop,
+          bottom: this.formConfigChart.formData.chartPaddingBottom
+        };
+        this.$set(this.bindConfig, 'chartPadding', chartPadding);
       }else
         this.$set(this.bindConfig, data.property, data.args);
     },
