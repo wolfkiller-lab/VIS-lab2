@@ -1,10 +1,10 @@
 <template>
-    <div id="tree-container" :style="{width:600,height:600}" >
+    <div id="tree-container" :style="{width:700,height:700}" >
     </div>
 </template>
 <script>
 import * as d3 from 'd3';
-
+import * as d3h from 'd3-hierarchy';
 
 export default {
     name: 'Tree',
@@ -20,15 +20,13 @@ export default {
             titleRectHeight: 40,
             width:460,
             height:460,
+            tooltipPadding : {top: 5, right: 5, bottom: 5, left: 5},
             chartPadding : {top: 80, right: 80, bottom: 80, left: 80},
-            data: [],
+            data: 
+                {'name': 'flare', 'children': [{'name': 'analytics', 'children': [{'name': 'cluster', 'children': [{'name': 'AgglomerativeCluster', 'value': 3938}, {'name': 'CommunityStructure', 'value': 3812}, {'name': 'HierarchicalCluster', 'value': 6714}, {'name': 'MergeEdge', 'value': 743}]}, {'name': 'graph', 'children': [{'name': 'BetweennessCentrality', 'value': 3534}, {'name': 'LinkDistance', 'value': 5731}, {'name': 'MaxFlowMinCut', 'value': 7840}, {'name': 'ShortestPaths', 'value': 5914}, {'name': 'SpanningTree', 'value': 3416}]}, {'name': 'optimization', 'children': [{'name': 'AspectRatioBanker', 'value': 7074}]}]}, {'name': 'animate', 'children': [{'name': 'Easing', 'value': 17010}, {'name': 'FunctionSequence', 'value': 5842}, {'name': 'interpolate', 'children': [{'name': 'ArrayInterpolator', 'value': 1983}, {'name': 'ColorInterpolator', 'value': 2047}, {'name': 'DateInterpolator', 'value': 1375}, {'name': 'Interpolator', 'value': 8746}, {'name': 'MatrixInterpolator', 'value': 2202}, {'name': 'NumberInterpolator', 'value': 1382}, {'name': 'ObjectInterpolator', 'value': 1629}, {'name': 'PointInterpolator', 'value': 1675}, {'name': 'RectangleInterpolator', 'value': 2042}]}, {'name': 'ISchedulable', 'value': 1041}, {'name': 'Parallel', 'value': 5176}, {'name': 'Pause', 'value': 449}, {'name': 'Scheduler', 'value': 5593}, {'name': 'Sequence', 'value': 5534}, {'name': 'Transition', 'value': 9201}, {'name': 'Transitioner', 'value': 19975}, {'name': 'TransitionEvent', 'value': 1116}, {'name': 'Tween', 'value': 6006}]}]}
+            ,
+            nodesText: 'null',
         };
-    },
-    // https://cn.vuejs.org/v2/api/#mounted
-    mounted() {
-        // 这里会在实例被挂载后调用
-        // 初始化图表
-        this.initTree();
     },
     // https://cn.vuejs.org/v2/api/#computed
     // https://cn.vuejs.org/v2/guide/computed.html#%E5%9F%BA%E7%A1%80%E4%BE%8B%E5%AD%90
@@ -62,7 +60,164 @@ export default {
                 }
             }
         },
+        // 标题位置
+        'options.titlePosition': {
+            handler() {
+                this.updateTitle();
+            }
+        },
+        // 标题背景
+        'options.titleBackground': {
+            handler() {
+                if(this.options.titleIsShow){
+                   this.title.select('rect').attr('fill',`${this.options.titleBackground}`);
+                }
+            }
+        },
+        // 标题字体颜色
+        'options.titleFontColor': {
+            handler() {
+                if(this.options.titleIsShow){
+                   this.title.select('text').attr('fill',`${this.options.titleFontColor}`);
+                }
+            }
+        },
+        // 标题字体位置
+        'options.titleTextPosition': {
+            handler() {
+                if(this.options.titleIsShow){
+                    // 修改text相对标题rect的位置,来更改文本对齐方式
+                    switch(this.options.titleTextPosition){
+                        case 'center':  this.title.select('text')
+                                            .attr('text-anchor','middle')
+                                            .attr('x',350);
+                                        break;
+                        case 'left':    this.title.select('text')
+                                            .attr('text-anchor','start')
+                                            .attr('x',10);
+                                        break;
+                        case 'right':   this.title.select('text')
+                                            .attr('text-anchor','end')
+                                            .attr('x',690);
+                                        break;
+                        default: break;
+                    }
+                    
+                }
+            }
+        },
+        // 标题字体样式
+        'options.titleFontFamily': {
+            handler() {
+                if(this.options.titleIsShow){
+                   this.title.select('text').attr('font-family',`${this.options.titleFontFamily}`);
+                }
+            }
+        },
+        // 标题字体大小
+        'options.titleFontSize': {
+            handler() {
+                if(this.options.titleIsShow){
+                   this.title.select('text').attr('font-size',`${this.options.titleFontSize}`);
+                }
+            }
+        },
+        
+        // node
+        // 是否显示
+        'options.nodesIsShow': {
+            handler() {
+                if(this.options.nodesIsShow){
+                    this.nodeEnter.attr('style','display: block');
+                }else{
+                    this.nodeEnter.attr('style','display: none');
+                }
+            }
+        },
+        // 文本字体大小
+        'options.nodesFontSize': {
+            handler() {
+                if(this.options.nodesIsShow){
+                   this.nodeEnter.select('text').attr('font-size',`${this.options.nodesFontSize}`);
+                }
+            }
+        },
+        // 文字字体样式
+        'options.nodesFontFamily': {
+            handler() {
+                if(this.options.nodesIsShow){
+                   this.nodeEnter.select('text').attr('font-family',`${this.options.nodesFontFamily}`);
+                }
+            }
+        },
+        // 文本字体颜色
+        'options.nodesFontColor':{
+            handler() {
+                if(this.options.nodesIsShow){
+                    this.nodeEnter.select('text').attr('stroke',`${this.options.nodesFontColor}`);
+                }
+            }
+        },
+        // 节点大小
+        'options.nodesCircleSize':{
+            handler(){
+                this.nodeEnter.select('circle').attr('r',`${this.options.nodesCircleSize}`);
+            }
+        },
+        // 线条粗细
+        'options.nodesLineWidth':{
+            handler(){
+                this.gLink.attr('stroke-width',`${this.options.nodesLineWidth}`);
+            }
+        },
+
+        // chart
+        'options.chartBackground': {
+            handler(){
+                this.svg.attr('style',`background: ${this.options.chartBackground}`);
+            }
+        },
+        'options.chartPaddingCross': {
+            handler() {
+                this.svg.attr('width',`${this.options.chartPaddingCross}`);
+            }
+        },
+        'options.chartPaddingVer': {
+            handler() {
+                this.svg.attr('height',`${this.options.chartPaddingVer}`);
+            }
+        },
+        // 滚动
+        'options.scrollingIsShow':{
+            handler() {
+                if(this.options.scrollingIsShow){
+                    d3.select('#tree-container').style('overflow','scroll');
+                }else{
+                    d3.select('#tree-container').style('overflow','hidden');
+                }
+            }
+        },
+        'options.scrollingWidth':{
+            handler(){
+                if(this.options.scrollingIsShow){
+                    d3.select('#tree-container').style('width',`${this.options.scrollingWidth}px`);
+                }
+            }
+        },
+        'options.scrollingHeight':{
+            handler(){
+                if(this.options.scrollingIsShow){
+                    d3.select('#tree-container').style('height',`${this.options.scrollingHeight}px`);
+                }
+            }
+        },
         // 请根据组件需要补充...
+    },
+    // https://cn.vuejs.org/v2/api/#mounted
+    mounted() {
+        // 这里会在实例被挂载后调用
+        // 初始化图表
+        this.initTree();
     },
     // https://cn.vuejs.org/v2/api/#methods
     methods: {
@@ -72,31 +227,55 @@ export default {
         initTree() {
           // 在这里编写初始化图表的代码，以下代码仅供参考，均可调整
           // 可以使用d3绘制可视化图表，具体可参考 bar chart 示例和 README.md 中的链接
+          
           console.log(this.options);
-
+          this.treeRoot=d3h.hierarchy(this.data);
           // 指定图表的宽高
-          this.width = 700 - this.chartPadding.right - this.chartPadding.left-180;
-          this.height = 700 -this.chartPadding.bottom - this.chartPadding.top-80;
+          this.width = 1100 - this.chartPadding.right - this.chartPadding.left-180;
+          this.height = 800 -this.chartPadding.bottom - this.chartPadding.top-80;
           
           d3.select('#tree-container')
-                .style('width','720px')
-                .style('height','720px');
+                .style('width','1100px')
+                .style('height','800px');
           
           // 添加svg
           this.svg = d3.select('#tree-container').append('svg')
                           .attr('style','background: #eee')
-                          .attr('width',700)
-                          .attr('height',700);
+                          .attr('width',1100)
+                          .attr('height',800);
           // 添加g标签 
           this.g = this.svg.append('g')
                       .attr('class','chart')  // 图表部分
-                      .attr('transform',`translate(${this.chartPadding.left+40}, ${this.chartPadding.top+40})`);
+                      .attr('transform',`translate(${this.chartPadding.left}, ${this.chartPadding.top})`);
+          
+          // 添加提示框
+          this.tooltip = this.g.append('g')
+                               .attr('class','tooltip') 
+                               .attr('opacity',0); // 默认不显示
+
+          this.tooltip.append('rect')
+                      .attr('fill','#eeeeee')
+                      .attr('rx',0)
+                      .attr('ry',0)
+                      .attr('stroke','black')
+                      .attr('style','stroke-width:1');
+
+          this.tooltip.append('text')
+                      .attr('font-size',12)
+                      .attr('transform',`translate(${this.tooltipPadding.left},${this.tooltipPadding.top+12})`);
+                
+          d3.select('.tooltip').select('rect')
+                      .attr('width',75)
+                      .attr('height',23);  // 为提示框设置默认尺寸
+          
+          
+
           // 添加图表标题
           this.title = this.svg.append('g')
-                          .attr('transform','translate(0,0)')
-                          .attr('style','display: none');     // 默认不显示
+                           .attr('transform','translate(0,0)')
+                           .attr('style','display: none');     // 默认不显示
           // 标题背景框
-            this.title.append('rect')
+          this.title.append('rect')
                     .attr('class','title')
                     .attr('width', 700)
                     .attr('height',`${this.titleRectHeight}`)
@@ -110,9 +289,82 @@ export default {
                   .attr('y',25)
                   .attr('text-anchor','middle')
                   .attr('fill','#000');
-        },
-    }
+           // tree
+           this.treeLayout=d3h.tree();
+           this.treeLayout.size([600,600]);
+           this.treeLayout(this.treeRoot);
 
+           this.nodeEnter = this.g.append('g')
+                .attr('class','nodes')
+                .selectAll('node')
+                .data(this.treeRoot.descendants())
+                .enter()
+                .append('g')
+                .classed('node',true)
+                .attr('transform', d => `translate(${d.y},${d.x})`);
+
+            this.nodeEnter.append('circle')
+                .attr('r', 2.5)
+                .attr('fill', d => d._children ? '#555' : '#999')
+                .attr('stroke-width', 10);
+
+            this.nodeEnter.append('text')
+                .attr('dy', '0.31em')
+                .attr('x', d => d._children ? -6 : 6)
+                .attr('font-size','12px')  // 用style会不能改字体大小
+                .text(d => d.data.name)
+                .text(':')  
+                .text(d => d.data.value);                                 
+
+            this.gLink = this.g.append('g')
+                .attr('fill', 'none')
+                .attr('stroke', '#555')
+                .attr('stroke-opacity', 0.4)
+                .attr('stroke-width', 1.5)
+                .selectAll('path')
+                .data(this.treeRoot.links())
+                .join('path')
+                .attr(
+                    'd',
+                    d3.linkHorizontal()
+                    .x(d=>d.y)
+                    .y(d=>d.x)
+                );
+            const chartpadding = this.chartPadding;
+            // bar的悬浮显示提示框
+            this.chart.on('mouseover', function (d) {
+                    const x =d3.event.layerX-50-chartpadding.left;
+                    const y =d3.event.layerY-chartpadding.top;
+                    d3.select('.tooltip')
+                        .attr('transform',`translate(${x},${y})`)   // 提示框跟随鼠标移动
+                        .attr('opacity',0.7);
+                    d3.select('.tooltip').select('text')
+                        .text(`${d.data.name}`);
+                    
+                })
+                .on('mouseout', function () {
+                    d3.select('.tooltip')
+                        .attr('opacity',0);
+                });
+        },
+        updateTitle() {
+            if(this.options.titleIsShow){
+                // 根据设置进行对应旋转和平移
+                switch(this.options.titlePosition){
+                    case 'top':     this.title.attr('transform','rotate(0) translate(0,0)');
+                                    break;
+                    case 'bottom':  this.title.attr('transform','rotate(0) translate(0,700)');
+                                    break;
+                    case 'left':    this.title.attr('transform','translate(0,700) rotate(270)');
+                                    break;
+                    case 'right':   this.title.attr('transform','translate(1000,0) rotate(90)');
+                                    break;
+                    default: break;
+                }
+                    
+            }
+        },
+    },
 };
 </script>
 <style scoped>

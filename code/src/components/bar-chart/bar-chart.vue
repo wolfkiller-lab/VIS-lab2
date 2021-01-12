@@ -54,12 +54,6 @@ export default {
             colorList:['#BCA2A2','#E0B09F','#CAD9B0','#B0C4D9','#C6B0D9','#F2DEAA']
         };
     },
-    // https://cn.vuejs.org/v2/api/#mounted
-    mounted() {
-        // 这里会在实例被挂载后调用
-        // 初始化图表
-        this.initBarChart();
-    },
     // https://cn.vuejs.org/v2/api/#computed
     // https://cn.vuejs.org/v2/guide/computed.html#%E5%9F%BA%E7%A1%80%E4%BE%8B%E5%AD%90
     computed: {
@@ -539,6 +533,12 @@ export default {
             }
         }
 
+    },
+    // https://cn.vuejs.org/v2/api/#mounted
+    mounted() {
+        // 这里会在实例被挂载后调用
+        // 初始化图表
+        this.initBarChart();
     },
     // https://cn.vuejs.org/v2/api/#methods
     methods: {

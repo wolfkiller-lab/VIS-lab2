@@ -20,6 +20,31 @@
               </div>
             </el-scrollbar>
           </el-tab-pane>
+          <el-tab-pane label="node" name="second">
+            <el-scrollbar style="height: 100%">
+              <div class="form-box">
+                <HForm
+                  v-if="isInited"
+                  :formData="formConfigNodes.formData"
+                  :items="formConfigNodes.items"
+                  @eventdone="eventDone"
+                ></HForm>
+              </div>
+            </el-scrollbar>
+          </el-tab-pane>
+          
+          <el-tab-pane label="chart" name="third">
+            <el-scrollbar style="height: 100%">
+              <div class="form-box">
+                <HForm
+                  v-if="isInited"
+                  :formData="formConfigChart.formData"
+                  :items="formConfigChart.items"
+                  @eventdone="eventDone"
+                ></HForm>
+              </div>
+            </el-scrollbar>
+          </el-tab-pane>
         </el-tabs>
         <!-- 根据需要还可以添加 tooltip, 颜色列表....等 -->
       </div>
@@ -32,6 +57,9 @@ import TestGrid from "~/tests/components/test-grid";
 import HForm from "~/tests/components/h-form";
 // 下面这里请根据你自己的开发情况import相应组件的配置项
 import settingTitle from "~/tests/setting-rules/property-setting-tree-title";
+import settingNodes from "~/tests/setting-rules/property-setting-tree-nodes"
+import settingTooltip from '~/tests/setting-rules/property-setting-tree-tooltip';
+import settingChart from "~/tests/setting-rules/property-setting-tree-chart"
 
 import { cloneDeep } from "lodash";
 
@@ -57,11 +85,42 @@ export default {
         titleFontFamily: "Arial",
         titleFontColor: "#000",
         // ... 根据需要添加更多
+        nodesIsShow: true,
+        nodesFontSize: 12,
+        nodesFontFamily: "Arial",
+        nodesFontColor: "#000",
+        nodesCircleSize: 2,
+        nodesLineWidth: 2,
+
+        tooltipIsShow: true,
+        tooltipPadding: {top: 0, right: 0, bottom: 0, left: 0},
+        tooltipColor: '#eee',
+        tooltipBorder: '1px',
+        tooltipBorderRadius: 0,
+
+        chartBackground: '#eee',
+        chartPaddingCross: 1100,
+        chartPaddingVer: 800,
+        scrollingIsShow: 'false',
+        scrollingWidth: 1100,
+        scrollingHeight: 800,
       },
       formConfigTitle: {
         formData: {},
         items: [],
       },
+      formConfigNodes: {
+        formData: {},
+        items: [],
+      },
+      formConfigTooltip: {
+        formData: {},
+        items: [],
+      },
+      formConfigChart: {
+        formData: {},
+        items: [],
+      }
       // ...
     };
   },
@@ -85,6 +144,9 @@ export default {
     initFormSetting() {
       // 初始化表单设置
       this.buildPropertyGroup(settingTitle, "formConfigTitle");
+      this.buildPropertyGroup(settingNodes, "formConfigNodes");
+      this.buildPropertyGroup(settingTooltip, 'formConfigTooltip');
+      this.buildPropertyGroup(settingChart, "formConfigChart");
 
       this.$nextTick(() => {
         this.isInited = true;
@@ -233,6 +295,19 @@ export default {
       } catch (error) {
         console.log(rule);
       }
+    },
+    eventDoneTooltip (data) {
+      // 合并padding对象
+      if (data.property.indexOf('Padding') !== -1) {
+        const tooltipPadding = {
+          left: this.formConfigTooltip.formData.tooltipPaddingLeft,
+          right: this.formConfigTooltip.formData.tooltipPaddingRight,
+          top: this.formConfigTooltip.formData.tooltipPaddingTop,
+          bottom: this.formConfigTooltip.formData.tooltipPaddingBottom
+        };
+        this.$set(this.bindConfig, 'tooltipPadding', tooltipPadding);
+      }else
+        this.$set(this.bindConfig, data.property, data.args);
     },
     eventDone(data) {
       this.$set(this.bindConfig, data.property, data.args);

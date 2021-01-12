@@ -24,12 +24,6 @@ export default {
             data: [],
         };
     },
-    // https://cn.vuejs.org/v2/api/#mounted
-    mounted() {
-        // 这里会在实例被挂载后调用
-        // 初始化图表
-        this.initTreeMap();
-    },
     // https://cn.vuejs.org/v2/api/#computed
     // https://cn.vuejs.org/v2/guide/computed.html#%E5%9F%BA%E7%A1%80%E4%BE%8B%E5%AD%90
     computed: {
@@ -63,6 +57,12 @@ export default {
             }
         },
         // 请根据组件需要补充...
+    },
+    // https://cn.vuejs.org/v2/api/#mounted
+    mounted() {
+        // 这里会在实例被挂载后调用
+        // 初始化图表
+        this.initTreeMap();
     },
     // https://cn.vuejs.org/v2/api/#methods
     methods: {
